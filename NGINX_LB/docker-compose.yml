@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    networks:
+      - appnet
+    volumes:
+      - redis_vol:/data/
+
+  app_container1:
+    image: markantonydocker/flask-ipstack:latest
+    container_name: app_container1
+    restart: always
+    networks:
+      - appnet
+    environment:
+      - CACHING_SERVER=redis
+      - IPSTACK_KEY=431c6bcfd46934f061fe1c59660e82d1        
+  
+  app_container2:
+    image: markantonydocker/flask-ipstack:latest
+    container_name: app_container2
+    restart: always
+    networks:
+      - appnet
+    environment:
+      - CACHING_SERVER=redis
+      - IPSTACK_KEY=431c6bcfd46934f061fe1c59660e82d1    
+
+  app_container3:
+    image: markantonydocker/flask-ipstack:latest
+    container_name: app_container3
+    restart: always
+    networks:
+      - appnet
+    environment:
+      - CACHING_SERVER=redis
+      - IPSTACK_KEY=431c6bcfd46934f061fe1c59660e82d1    
+
+  nginx:
+
+    image: nginx:alpine
+    container_name: nginx
+    depends_on:
+      - app_container1
+      - app_container2
+      - app_container3  
+    restart: always
+    networks:
+      - appnet
+    volumes:
+      - ./default.conf:/etc/nginx/nginx.conf
+      - ./ssl.crt:/etc/ssl/certs/ssl.crt
+      - ./ssl.key:/etc/ssl/private/ssl.key
+    ports:
+      - "80:80"
+      - "443:443"
+
+volumes:
+  redis_vol:        
+
+networks: 
+  appnet: 
